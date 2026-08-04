@@ -1,0 +1,7 @@
+{
+  "name": "@t3code/plugin-linear",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": { "test": "bun test", "typecheck": "bunx tsc --noEmit" }
+}
