@@ -15,9 +15,10 @@
     "settings": [
       { "id": "linear.endpoint", "title": "Linear-compatible endpoint", "scope": "server", "field": { "kind": "text", "default": "https://api.linear.app", "placeholder": "https://kanbanger.example/graphql" } },
       { "id": "linear.api-token", "title": "API token", "scope": "server", "field": { "kind": "text", "secret": true } },
-      { "id": "linear.workspace", "title": "Workspace", "scope": "server", "field": { "kind": "text", "placeholder": "workspace-id" } }
+      { "id": "linear.workspace", "title": "Workspace", "scope": "server", "field": { "kind": "text", "placeholder": "workspace-id" } },
+      { "id": "linear.polling-seconds", "title": "Refresh interval", "scope": "server", "field": { "kind": "number", "default": 60, "min": 15, "max": 3600, "step": 15 } }
     ],
-    "settingsPanels": [{ "id": "linear.connection", "title": "Linear connection", "description": "Works with Linear and compatible Kanbanger GraphQL endpoints.", "settingIds": ["linear.endpoint", "linear.api-token", "linear.workspace"] }],
+    "settingsPanels": [{ "id": "linear.connection", "title": "Linear connection", "description": "Works with Linear and compatible Kanbanger GraphQL endpoints.", "settingIds": ["linear.endpoint", "linear.api-token", "linear.workspace", "linear.polling-seconds"] }],
     "hooks": ["project.opened", "thread.created"]
   },
   "capabilities": [
