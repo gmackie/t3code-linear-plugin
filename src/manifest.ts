@@ -6,6 +6,7 @@ export const manifest = {
   runtime: { kind: "managed-app", command: ["linear-t3-plugin"], restart: "on-failure" },
   contributes: {
     panels: [{ id: "linear.issues", title: "Linear issues", surface: "project" }],
+    workflows: [{ id: "linear.issue-review", title: "Issue review", surface: "thread.main" }],
     hooks: ["project.opened", "thread.created"],
   },
   capabilities: [

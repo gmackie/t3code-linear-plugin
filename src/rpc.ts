@@ -1,4 +1,4 @@
-import type { LinearIssueSource } from "./issues.ts";
+import { buildIssueReviewWorkflow, type LinearIssueSource } from "./issues.ts";
 
 type Request = { method: string; payload: Record<string, unknown> };
 type Response = { ok: true; result: unknown } | { ok: false; error: string };
@@ -27,6 +27,13 @@ export function createLinearRpcHandler(source: LinearSource) {
             ok: true,
             result: await source.updateIssue(requiredString(request.payload.itemId, "itemId"), request.payload.input as Record<string, unknown>),
           };
+        case "workflow.get": {
+          const projectId = requiredString(request.payload.projectId, "projectId");
+          const itemId = requiredString(request.payload.itemId, "itemId");
+          const item = (await source.listIssues(projectId)).find((candidate) => candidate.id === itemId);
+          if (!item) return { ok: false, error: `Linear issue not found: ${itemId}` };
+          return { ok: true, result: buildIssueReviewWorkflow(item) };
+        }
         default:
           return { ok: false, error: `unsupported Linear RPC method: ${request.method}` };
       }

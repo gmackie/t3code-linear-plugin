@@ -1,5 +1,7 @@
 import type { LinearIssue, LinearProject, WorkItem } from "./types.ts";
 
+export type IssueReviewWorkflowModel = { readonly pluginId: string; readonly workflowId: string; readonly title: string; readonly currentStage: "inspect" | "context" | "propose" | "review" | "approve" | "execute" | "verify" | "respond"; readonly refreshedAt: string; readonly steps: readonly { id: string; stage: IssueReviewWorkflowModel["currentStage"]; title: string; state: "pending" | "active" | "completed" | "blocked" | "failed"; detail?: string }[]; readonly evidence?: readonly { id: string; title: string; kind: "check" | "artifact" | "diff" | "log" | "link"; status: "neutral" | "positive" | "warning" | "negative"; detail?: string; url?: string }[]; readonly actions?: readonly { id: string; title: string; tone?: "primary" | "secondary" | "destructive" }[] };
+
 export type LinearGraphqlTransport = (input: { query: string; variables?: Record<string, unknown> }) => Promise<unknown>;
 
 const category = (type: string | undefined): WorkItem["status"]["category"] => {
@@ -25,6 +27,20 @@ export function normalizeLinearIssue(issue: LinearIssue, projectId?: string): Wo
     ...(issue.updatedAt ? { updatedAt: issue.updatedAt } : {}),
     labels: issue.labels?.nodes?.flatMap((label) => label.name ? [label.name] : []),
   };
+}
+
+export function buildIssueReviewWorkflow(item: WorkItem, state: { readonly approved?: boolean } = {}): IssueReviewWorkflowModel {
+  const steps = [
+    { id: "inspect", stage: "inspect" as const, title: "Inspect issue", state: "completed" as const, detail: item.title },
+    { id: "context", stage: "context" as const, title: "Collect project and issue context", state: "completed" as const },
+    { id: "propose", stage: "propose" as const, title: "Propose thread preparation", state: "completed" as const },
+    { id: "review", stage: "review" as const, title: "Review issue context", state: state.approved ? "completed" as const : "active" as const },
+    { id: "approve", stage: "approve" as const, title: "Approve thread preparation", state: state.approved ? "completed" as const : "pending" as const },
+    { id: "execute", stage: "execute" as const, title: "Open T3 thread from issue", state: state.approved ? "active" as const : "pending" as const },
+    { id: "verify", stage: "verify" as const, title: "Verify thread linkage", state: "pending" as const },
+    { id: "respond", stage: "respond" as const, title: "Prepare issue response", state: "pending" as const },
+  ];
+  return { pluginId: "com.t3code.linear", workflowId: "linear.issue-review", title: "Issue review", currentStage: state.approved ? "execute" : "review", refreshedAt: new Date().toISOString(), steps, evidence: [{ id: "issue-link", title: "Issue reference", kind: "link", status: item.url ? "positive" : "neutral", detail: item.url ?? `${item.providerId}:${item.id}`, ...(item.url ? { url: item.url } : {}) }], actions: state.approved ? [] : [{ id: "approve", title: "Approve thread preparation", tone: "primary" }] };
 }
 
 export function parseProjects(payload: unknown): readonly LinearProject[] {

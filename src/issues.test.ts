@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test";
-import { LinearIssueSource, normalizeLinearIssue, parseProjects } from "./issues.ts";
+import { LinearIssueSource, buildIssueReviewWorkflow, normalizeLinearIssue, parseProjects } from "./issues.ts";
 
 describe("standalone Linear plugin", () => {
   it("normalizes compatible Linear clone issue payloads", () => {
@@ -15,5 +15,12 @@ describe("standalone Linear plugin", () => {
   it("keeps GraphQL transport injectable for compatible endpoints", async () => {
     const source = new LinearIssueSource(async ({ query }) => query.startsWith("query") ? { data: { projects: { nodes: [{ id: "p1", name: "Project" }] } } } : {});
     await expect(source.listProjects()).resolves.toEqual([{ id: "p1", name: "Project" }]);
+  });
+
+  it("builds an issue review workflow for T3 thread preparation", () => {
+    const workflow = buildIssueReviewWorkflow({ providerId: "linear", id: "i1", title: "Fix", status: { id: "s1", label: "Started", category: "active" }, scope: { projectId: "p1" } });
+    expect(workflow.currentStage).toBe("review");
+    expect(workflow.evidence?.[0]?.kind).toBe("link");
+    expect(workflow.actions?.[0]?.id).toBe("approve");
   });
 });

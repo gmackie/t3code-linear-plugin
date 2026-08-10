@@ -12,6 +12,7 @@
     "panels": [
       { "id": "linear.issues", "title": "Linear issues", "surface": "project" }
     ],
+    "workflows": [{ "id": "linear.issue-review", "title": "Issue review", "surface": "thread.main" }],
     "settings": [
       { "id": "linear.endpoint", "title": "Linear-compatible endpoint", "scope": "server", "field": { "kind": "text", "default": "https://api.linear.app", "placeholder": "https://kanbanger.example/graphql" } },
       { "id": "linear.api-token", "title": "API token", "scope": "server", "field": { "kind": "text", "secret": true } },
