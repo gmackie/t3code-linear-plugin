@@ -1,32 +1,59 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "com.t3code.linear",
   "displayName": "Linear",
-  "version": "0.1.0",
-  "runtime": {
-    "kind": "managed-app",
-    "command":["bun","src/stdio.ts"],
-    "restart": "on-failure"
+  "version": "0.2.0",
+  "description": "Linear and Linear-compatible (Kanbanger) issues for agents and panels.",
+  "mcpServer": {
+    "name": "linear",
+    "transport": {
+      "type": "stdio",
+      "command": "bun",
+      "args": [
+        "${pluginRoot}/src/mcp.ts"
+      ],
+      "env": [
+        {
+          "name": "LINEAR_API_URL",
+          "value": "https://api.linear.app/graphql",
+          "title": "Linear-compatible GraphQL endpoint",
+          "description": "Linear, or a compatible endpoint such as https://tasks.gmac.io/graphql."
+        },
+        {
+          "name": "LINEAR_API_TOKEN",
+          "value": "",
+          "sensitive": true,
+          "title": "API key",
+          "description": "A Linear personal API key, Linear OAuth token, or Kanbanger API key."
+        },
+        {
+          "name": "LINEAR_POLL_SECONDS",
+          "value": "60",
+          "title": "Refresh interval in seconds (15-3600)"
+        }
+      ]
+    }
   },
   "contributes": {
     "panels": [
-      { "id": "linear.issues", "title": "Linear issues", "surface": "project" }
+      {
+        "id": "linear-issues",
+        "title": "Linear issues",
+        "scope": "project",
+        "resourceUri": "ui://linear/issues.html",
+        "tool": {
+          "name": "linear_issues",
+          "arguments": {}
+        }
+      }
     ],
-    "workflows": [{ "id": "linear.issue-review", "title": "Issue review", "surface": "thread.main" }],
-    "settings": [
-      { "id": "linear.endpoint", "title": "Linear-compatible endpoint", "scope": "server", "field": { "kind": "text", "default": "https://api.linear.app", "placeholder": "https://kanbanger.example/graphql" } },
-      { "id": "linear.api-token", "title": "API token", "scope": "server", "field": { "kind": "text", "secret": true } },
-      { "id": "linear.workspace", "title": "Workspace", "scope": "server", "field": { "kind": "text", "placeholder": "workspace-id" } },
-      { "id": "linear.polling-seconds", "title": "Refresh interval", "scope": "server", "field": { "kind": "number", "default": 60, "min": 15, "max": 3600, "step": 15 } }
-    ],
-    "settingsPanels": [{ "id": "linear.connection", "title": "Linear connection", "description": "Works with Linear and compatible Kanbanger GraphQL endpoints.", "settingIds": ["linear.endpoint", "linear.api-token", "linear.workspace", "linear.polling-seconds"] }],
-    "hooks": ["project.opened", "thread.created"]
+    "commands": [
+      {
+        "id": "linear-open-issues",
+        "title": "Linear: Open issues",
+        "panel": "linear-issues"
+      }
+    ]
   },
-  "capabilities": [
-    { "kind": "secrets.read", "names": ["LINEAR_API_KEY"] },
-    { "kind": "network.connect", "hosts": ["api.linear.app"] },
-    { "kind": "ui.embed", "surfaces": ["project"] },
-    { "kind": "threads.read", "projectIds": [] },
-    { "kind": "threads.dispatch", "projectIds": [] }
-  ]
+  "t3Tools": []
 }
