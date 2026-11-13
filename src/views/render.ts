@@ -61,7 +61,9 @@ export function issueList(data: IssuesData, filter = ""): string {
   return `<section aria-label="Issues"><h2>Issues <span class="count">${items.length}</span></h2><ul>${rows}</ul></section>`;
 }
 
-export function renderIssues(data: IssuesData, filter = ""): string {
+// `error` is the last refresh failure; the header keeps the previous refresh
+// time next to it so stale data never looks current.
+export function renderIssues(data: IssuesData, filter = "", error?: string): string {
   const options = data.projects
     .map((project) => `<option value="${esc(project.id)}"${project.id === data.projectId ? " selected" : ""}>${esc(project.name)}</option>`)
     .join("");
@@ -76,7 +78,7 @@ ${issueList(data, filter)}`
       : "";
   return `<header>
   <h1>Linear issues</h1>
-  <div class="header-meta"><span>Refreshed ${esc(time(data.refreshedAt))} · every ${esc(data.pollSeconds)}s</span><button type="button" data-action="refresh">Refresh</button></div>
+  <div class="header-meta">${error ? `<span class="error" role="alert">${esc(error)}</span>` : ""}<span>${error ? "Last refreshed" : "Refreshed"} ${esc(time(data.refreshedAt))} · every ${esc(data.pollSeconds)}s</span><button type="button" data-action="refresh">Refresh</button></div>
 </header>
 ${picker}
 ${body}

@@ -6,20 +6,22 @@ const bridge = startView("linear-issues");
 const root = document.getElementById("app")!;
 let data: IssuesData | undefined;
 let filter = "";
+let error: string | undefined;
 let timer: ReturnType<typeof setTimeout> | undefined;
 let review: ReturnType<typeof mountReview> | undefined;
 
+// Without a previous data set there is nothing to keep, so the error replaces
+// the panel; otherwise draw() shows it in the header over the old data.
 function showError(message: string) {
-  const status = root.querySelector("header .header-meta span");
-  if (status) status.textContent = message;
-  else root.textContent = message;
+  error = message;
+  if (!data) root.textContent = message;
 }
 
 function draw() {
   if (!data) return;
   // Keep the review pane (and its state) across list refreshes.
   const pane = root.querySelector<HTMLElement>("[data-role=review]");
-  root.innerHTML = renderIssues(data, filter);
+  root.innerHTML = renderIssues(data, filter, error);
   if (pane) root.querySelector("[data-role=review]")!.replaceWith(pane);
   else review = mountReview(bridge, root.querySelector<HTMLElement>("[data-role=review]")!);
   clearTimeout(timer);
@@ -34,6 +36,7 @@ async function refresh(projectId = data?.projectId) {
   }
   try {
     data = toolData<IssuesData>(await bridge.callTool("linear_issues", projectId ? { projectId } : {}));
+    error = undefined;
   } catch (cause) {
     showError(`Refresh failed: ${cause instanceof Error ? cause.message : cause}`);
   }
@@ -66,10 +69,11 @@ root.addEventListener("click", (event) => {
 
 bridge.onToolResult = (result) => {
   if (result.isError) {
-    root.textContent = result.content?.find((part) => part.type === "text")?.text ?? "Linear issues failed to load.";
-    return;
+    showError(result.content?.find((part) => part.type === "text")?.text ?? "Linear issues failed to load.");
+  } else {
+    data = toolData<IssuesData>(result);
+    error = undefined;
   }
-  data = toolData<IssuesData>(result);
   draw();
 };
 // The panel's opening tool (linear_issues) delivers the first result; load it

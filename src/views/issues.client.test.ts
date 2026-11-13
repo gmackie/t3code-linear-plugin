@@ -14,6 +14,7 @@ describe("issues view in a DOM", () => {
     const win = new Window({ url: "https://view.invalid/" });
     const calls: string[] = [];
     const messages: string[] = [];
+    let failNextIssues = false;
     const deliver = (data: unknown) => win.dispatchEvent(new win.MessageEvent("message", { data, source: parent as never }));
     const parent = {
       async postMessage(message: { id?: number; method?: string; params?: any }) {
@@ -24,6 +25,11 @@ describe("issues view in a DOM", () => {
         }
         if (message.method === "tools/call") {
           calls.push(message.params.name);
+          if (failNextIssues && message.params.name === "linear_issues") {
+            failNextIssues = false;
+            deliver({ jsonrpc: "2.0", id: message.id, result: { isError: true, content: [{ type: "text", text: "Linear API token expired." }] } });
+            return;
+          }
           deliver({ jsonrpc: "2.0", id: message.id, result: await client.callTool({ name: message.params.name, arguments: message.params.arguments }) });
         }
       },
@@ -58,6 +64,23 @@ describe("issues view in a DOM", () => {
     expect(doc.querySelector("[data-role=review] strong")?.textContent).toBe("verify");
     expect(doc.querySelector("[data-action=approve]")).toBeNull();
     expect(calls).toEqual(["linear_issues", "linear_issue_review"]);
+
+    // A failed refresh keeps the old list but says so, next to the old time.
+    const header = () => doc.querySelector("header .header-meta")?.textContent ?? "";
+    expect(header()).not.toContain("failed");
+    failNextIssues = true;
+    (doc.querySelector("[data-action=refresh]") as unknown as HTMLElement).click();
+    await settle();
+    expect(header()).toContain("Refresh failed: Linear API token expired.");
+    expect(header()).toContain("Last refreshed");
+    expect(doc.querySelectorAll("[data-action=review]")).toHaveLength(2);
+    expect(doc.querySelector("[data-role=review] strong")?.textContent).toBe("verify");
+
+    // The next successful refresh clears it.
+    (doc.querySelector("[data-action=refresh]") as unknown as HTMLElement).click();
+    await settle();
+    expect(header()).not.toContain("failed");
+    expect(header()).toStartWith("Refreshed");
     await win.happyDOM.abort();
   });
 });
