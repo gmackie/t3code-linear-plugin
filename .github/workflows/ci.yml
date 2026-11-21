@@ -1,4 +1,4 @@
-name: Linear MCP plugin
+name: Kanbanger plugin
 
 on:
   pull_request:

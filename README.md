@@ -1,38 +1,21 @@
-# T3 Code Linear plugin
+# T3 Code Kanbanger plugin
 
-An independently installable T3 Code plugin for Linear and Linear-compatible GraphQL endpoints such as Kanbanger. Bob does not depend on it; Bob owns its own Bob-to-Linear links.
+Kanbanger issues and work graph for T3 Code. This repository was the Linear plugin; from 0.3.0 it is Kanbanger-only.
 
-The plugin is an MCP server (`src/mcp.ts`, stdio) described by a v2 manifest (`t3-plugin.json`). Version 0.2.0 replaced the v1 managed-app runtime and plugin RPC (T3CODE-75); T3 builds that only load v1 manifests cannot load it.
+## Plugin (manifest v2)
 
-## MCP server
+The plugin is the manifest `t3-plugin.json` plus Kanbanger's **hosted** MCP server, `https://tasks.gmac.io/mcp`. It has no local process.
 
-A stdio server on the official MCP TypeScript SDK v2 (`@modelcontextprotocol/server`). Views are MCP Apps: `ui://` HTML resources with the `text/html;profile=mcp-app` MIME type.
+- **Tools:** agents get every Kanbanger tool (workspaces, projects, issues, comments, workflow states, work items, documents, source anchors, delivery evidence) through Settings → Tools.
+- **Auth:** OAuth (`mcp:read`, `mcp:write`). T3 does discovery, registration, PKCE and refresh. No token is stored in the manifest.
+- **Panel:** `board` (project) renders `ui://kanbanger/board`, the issues assigned to you by status, with issue detail, status changes and comments. Opened without a tool result, it picks your first workspace and offers a workspace picker. `my_issues` also renders it inline after an agent calls it.
 
-- `linear_issues` lists projects and a project's issues, and renders `ui://linear/issues.html`. The view has a project picker and a filter, refreshes every `LINEAR_POLL_SECONDS`, and opens an issue's review inline.
-- `linear_issue_review` shows one issue (id or identifier such as `ENG-123`) with its team's workflow states, and renders `ui://linear/issue-review.html`. **Start work in this thread** sends the issue to the current thread as your message.
-- `linear_issue_create` and `linear_issue_update` are agent tools that create an issue in a project or change an issue's title, description or state.
+Install from Settings → Plugins → MCP plugins with this repository's directory. If the old `com.t3code.linear` plugin is installed, uninstall it first; its stored API key goes with it.
 
-The `linear-issues` panel is project-scoped. The `Linear: Open issues` command opens it.
-
-### Configuration
-
-| Env var | Old setting | Notes |
-|---|---|---|
-| `LINEAR_API_URL` | `linear.endpoint` | Default `https://api.linear.app/graphql`; e.g. `https://tasks.gmac.io/graphql` for Kanbanger |
-| `LINEAR_API_TOKEN` | `linear.api-token` | Secret. Linear personal API key, Linear OAuth token, or Kanbanger API key |
-| `LINEAR_POLL_SECONDS` | `linear.polling-seconds` | 15–3600, default 60 |
-
-Without a token the server still starts; each tool returns an error naming the missing setting.
-
-### Run it
+## Tests
 
 ```sh
 bun install
-bun test                # domain, MCP server (against a local fake endpoint), view and install tests
-bun run typecheck
-LINEAR_API_TOKEN=... bun run inspect   # official MCP Inspector (Apps tab)
+bun test                                    # manifest
+KANBANGER_MCP_TOKEN=<access token> bun test # + live check of the panel's view
 ```
-
-Install this directory through T3's plugin installer after `bun install --frozen-lockfile`, then set the endpoint and API key on the connected server. Web, desktop and mobile can open the panel; mobile uses the server installation.
-
-See `docs/manifest-v2.md` for the v1 → v2 mapping, the server rules and the open questions.
