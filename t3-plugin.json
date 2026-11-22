@@ -2,8 +2,8 @@
   "schemaVersion": 2,
   "id": "com.t3code.kanbanger",
   "displayName": "Kanbanger",
-  "version": "0.3.0",
-  "description": "Kanbanger issues and work graph for agents, and a board of your issues.",
+  "version": "0.4.0",
+  "description": "Kanbanger issues, planning specs and work graph for agents, with panels for your issues and planning specs.",
   "mcpServer": {
     "name": "kanbanger",
     "transport": {
@@ -23,6 +23,12 @@
         "title": "My issues",
         "scope": "project",
         "resourceUri": "ui://kanbanger/board"
+      },
+      {
+        "id": "specs",
+        "title": "Planning specs",
+        "scope": "project",
+        "resourceUri": "ui://kanbanger/specs"
       }
     ],
     "commands": [
@@ -30,6 +36,11 @@
         "id": "open-board",
         "title": "Kanbanger: Open my issues",
         "panel": "board"
+      },
+      {
+        "id": "open-specs",
+        "title": "Kanbanger: Open planning specs",
+        "panel": "specs"
       }
     ]
   },
