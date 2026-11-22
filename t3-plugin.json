@@ -1,57 +1,46 @@
 {
   "schemaVersion": 2,
-  "id": "com.t3code.linear",
-  "displayName": "Linear",
-  "version": "0.2.0",
-  "description": "Linear and Linear-compatible (Kanbanger) issues for agents and panels.",
+  "id": "com.t3code.kanbanger",
+  "displayName": "Kanbanger",
+  "version": "0.4.0",
+  "description": "Kanbanger issues, planning specs and work graph for agents, with panels for your issues and planning specs.",
   "mcpServer": {
-    "name": "linear",
+    "name": "kanbanger",
     "transport": {
-      "type": "stdio",
-      "command": "bun",
-      "args": [
-        "${pluginRoot}/src/mcp.ts"
-      ],
-      "env": [
-        {
-          "name": "LINEAR_API_URL",
-          "value": "https://api.linear.app/graphql",
-          "title": "Linear-compatible GraphQL endpoint",
-          "description": "Linear, or a compatible endpoint such as https://tasks.gmac.io/graphql."
-        },
-        {
-          "name": "LINEAR_API_TOKEN",
-          "value": "",
-          "sensitive": true,
-          "title": "API key",
-          "description": "A Linear personal API key, Linear OAuth token, or Kanbanger API key."
-        },
-        {
-          "name": "LINEAR_POLL_SECONDS",
-          "value": "60",
-          "title": "Refresh interval in seconds (15-3600)"
-        }
-      ]
+      "type": "http",
+      "url": "https://tasks.gmac.io/mcp",
+      "headers": [],
+      "auth": {
+        "type": "oauth",
+        "scopes": ["mcp:read", "mcp:write"]
+      }
     }
   },
   "contributes": {
     "panels": [
       {
-        "id": "linear-issues",
-        "title": "Linear issues",
+        "id": "board",
+        "title": "My issues",
         "scope": "project",
-        "resourceUri": "ui://linear/issues.html",
-        "tool": {
-          "name": "linear_issues",
-          "arguments": {}
-        }
+        "resourceUri": "ui://kanbanger/board"
+      },
+      {
+        "id": "specs",
+        "title": "Planning specs",
+        "scope": "project",
+        "resourceUri": "ui://kanbanger/specs"
       }
     ],
     "commands": [
       {
-        "id": "linear-open-issues",
-        "title": "Linear: Open issues",
-        "panel": "linear-issues"
+        "id": "open-board",
+        "title": "Kanbanger: Open my issues",
+        "panel": "board"
+      },
+      {
+        "id": "open-specs",
+        "title": "Kanbanger: Open planning specs",
+        "panel": "specs"
       }
     ]
   },
