@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "id": "com.t3code.kanbanger",
   "displayName": "Kanbanger",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Kanbanger issues, planning specs and work graph for agents, with panels for your issues and planning specs.",
   "mcpServer": {
     "name": "kanbanger",
@@ -22,13 +22,15 @@
         "id": "board",
         "title": "My issues",
         "scope": "project",
-        "resourceUri": "ui://kanbanger/board"
+        "resourceUri": "ui://kanbanger/board",
+        "issuesTab": true
       },
       {
         "id": "specs",
         "title": "Planning specs",
         "scope": "project",
-        "resourceUri": "ui://kanbanger/specs"
+        "resourceUri": "ui://kanbanger/specs",
+        "issuesTab": true
       }
     ],
     "commands": [
